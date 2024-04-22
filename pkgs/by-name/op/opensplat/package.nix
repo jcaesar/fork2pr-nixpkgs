@@ -80,7 +80,7 @@ stdenv'.mkDerivation {
   ]
     ++ lib.optionals cudaSupport [
       (lib.cmakeFeature "GPU_RUNTIME" "CUDA")
-      (lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" cudaPackages.cudatoolkit)
+      (lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${cudaPackages.cudatoolkit}/")
     ];
 
   meta = {
