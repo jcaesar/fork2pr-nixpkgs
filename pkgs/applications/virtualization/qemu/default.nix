@@ -81,9 +81,10 @@ stdenv.mkDerivation (finalAttrs: {
     ++ lib.optionals stdenv.isDarwin [ sigtool ];
 
   buildInputs = [ zlib glib pixman
-    vde2 texinfo lzo snappy libtasn1
+    vde2 lzo snappy libtasn1
     gnutls nettle curl libslirp
   ]
+    ++ lib.optionals enableDocs [ texinfo ]
     ++ lib.optionals ncursesSupport [ ncurses ]
     ++ lib.optionals stdenv.isDarwin [ CoreServices Cocoa Hypervisor rez setfile vmnet ]
     ++ lib.optionals seccompSupport [ libseccomp ]
