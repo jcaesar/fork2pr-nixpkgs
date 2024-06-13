@@ -215,7 +215,7 @@ let
   }; # end of configfile derivation
 
   kernel = (callPackage ./manual-config.nix { inherit lib stdenv buildPackages; }) (basicArgs // {
-    inherit kernelPatches randstructSeed extraMakeFlags extraMeta configfile modDirVersion;
+    inherit kernelPatches randstructSeed extraMakeFlags extraMeta configfile modDirVersion kernelArch;
     pos = builtins.unsafeGetAttrPos "version" args;
 
     config = {

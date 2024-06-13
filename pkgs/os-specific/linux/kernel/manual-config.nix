@@ -49,6 +49,9 @@ in lib.makeOverridable ({
   isLibre    ? false,
   isHardened ? false,
 
+  # must match arg passed to linux-config
+  kernelArch ? stdenv.hostPlatform.linuxArch,
+
   # Whether to utilize the controversial import-from-derivation feature to parse the config
   allowImportFromDerivation ? false,
   # ignored
@@ -201,6 +204,8 @@ let
         for i in $(find arch -name install.sh); do
             patchShebangs "$i"
         done
+
+        substituteInPlace arch/um/Makefile --replace-fail 'SHELL := /bin/bash' 'SHELL := ${stdenv.shell}'
       '';
 
       configurePhase = ''
@@ -422,7 +427,7 @@ stdenv.mkDerivation ((drvAttrs config stdenv.hostPlatform.linux-kernel kernelPat
     "CC=${stdenv.cc}/bin/${stdenv.cc.targetPrefix}cc"
     "HOSTCC=${buildPackages.stdenv.cc}/bin/${buildPackages.stdenv.cc.targetPrefix}cc"
     "HOSTLD=${buildPackages.stdenv.cc.bintools}/bin/${buildPackages.stdenv.cc.targetPrefix}ld"
-    "ARCH=${stdenv.hostPlatform.linuxArch}"
+    "ARCH=${kernelArch}"
   ] ++ lib.optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
     "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
   ] ++ (stdenv.hostPlatform.linux-kernel.makeFlags or [])
