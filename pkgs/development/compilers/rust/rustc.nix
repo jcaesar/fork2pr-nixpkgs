@@ -164,6 +164,8 @@ in stdenv.mkDerivation (finalAttrs: {
     "${setHost}.musl-root=${pkgsBuildHost.targetPackages.stdenv.cc.libc}"
   ] ++ optionals stdenv.targetPlatform.isMusl [
     "${setTarget}.musl-root=${pkgsBuildTarget.targetPackages.stdenv.cc.libc}"
+  ] ++ optionals stdenv.targetPlatform.isWasi [
+    "${setTarget}.wasi-root=${pkgsBuildTarget.targetPackages.stdenv.cc.libc}"
   ] ++ optionals stdenv.targetPlatform.rust.isNoStdTarget [
     "--disable-docs"
   ] ++ optionals (stdenv.hostPlatform.isDarwin && stdenv.hostPlatform.isx86_64) [
