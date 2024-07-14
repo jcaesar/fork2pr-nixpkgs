@@ -334,7 +334,7 @@ stdenvNoCC.mkDerivation {
       hardening_unsupported_flags+=" pic"
     ''
 
-    + optionalString (targetPlatform.isAvr || targetPlatform.isWindows) ''
+    + optionalString (targetPlatform.isAvr || targetPlatform.isWindows || targetPlatform.isWasi) ''
       hardening_unsupported_flags+=" relro bindnow"
     ''
 
