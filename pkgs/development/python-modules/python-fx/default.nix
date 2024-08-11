@@ -18,7 +18,7 @@
   pyperclip,
   pytestCheckHook,
   pythonOlder,
-  antlr4,
+  antlr4_8,
   pyyaml,
   setuptools,
   six,
@@ -26,9 +26,24 @@
   parameterized,
   wcwidth,
   yamale,
-}:
+}: let
 
-buildPythonPackage rec {
+  antlr4-python3-runtime' = antlr4-python3-runtime.override { antlr4 = antlr4_8; };
+  antlr4-python3-runtime'' = antlr4-python3-runtime'.overrideAttrs {
+    postPatch = "";
+    prePatch = "mkdir tests; touch tests/run.py;";
+  };
+  urwid'' = urwid.overridePythonAttrs {
+    version = "2.1.1";
+    src = urwid.src.override {
+      rev = "refs/tags/release-2.1.1";
+      hash = "sha256-up3pXS/O2ztBf5BGZ1B+U+ROotWQPH4R3TWpSoqu0dU=";
+    };
+    postPatch = "";
+    pytestCheckPhase = "rm -rf uwid/tests/";
+  };
+
+in buildPythonPackage rec {
   pname = "python-fx";
   version = "0.3.1";
   format = "setuptools";
@@ -42,20 +57,15 @@ buildPythonPackage rec {
     hash = "sha256-BXKH3AlYMNbMREW5Qx72PrbuZdXlmVS+knWWu/y9PsA=";
   };
 
-  postPatch = ''
-    rm src/pyfx/model/common/jsonpath/*.{g4,interp,tokens}
-    antlr -Dlanguage=Python3 -visitor -o src/pyfx/model/common/jsonpath/ *.g4
-  '';
-
   pythonRelaxDeps = true;
 
   nativeBuildInputs = [
-    antlr4
+    antlr4_8
     setuptools
   ];
 
   propagatedBuildInputs = [
-    antlr4-python3-runtime
+    antlr4-python3-runtime''
     asciimatics
     click
     dacite
@@ -71,7 +81,7 @@ buildPythonPackage rec {
     pyperclip
     pyyaml
     six
-    urwid
+    urwid''
     wcwidth
     yamale
   ];
