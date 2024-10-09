@@ -296,6 +296,22 @@ in stdenv.mkDerivation (finalAttrs: {
 
     # remove uninstall script that doesn't really make sense for Nix.
     rm $out/lib/rustlib/uninstall.sh
+  '' + optionalString (stdenv.targetPlatform.isWasi && false) ''
+    # Rustc has decided to hard-code wasm32-wasi* as having a self-contained linker.
+    # It checks that a gcc-ld dir exists and adds it as a linker search path.
+    # Meanwhile, nix names the linker ${stdenv.targetPlatform.config}-wasm-ld,
+    # but rustc passes `-target ${stdenv.targetPlatform.rust.rustcTarget}` to clang,
+    # which clang doesn't normalise, and thus looks for the linker with the wrong target prefix.
+    # This is a good opportunity to work around two problems at once. Requires some symlink trickery.
+    host_rustlib=$out/lib/rustlib/${stdenv.hostPlatform.rust.rustcTarget}
+    mkdir -p $host_rustlib-tmp
+    for f in $host_rustlib/*; do
+      ln -s "$(realpath "$f")" $host_rustlib-tmp/
+    done
+    mkdir -p $host_rustlib-tmp/bin/gcc-ld
+    ln -s ${llvmPackages.clang}/bin/${stdenv.targetPlatform.config}-wasm-ld $host_rustlib-tmp/bin/gcc-ld/wasm-ld
+    rm $host_rustlib
+    mv $host_rustlib-tmp $host_rustlib
   '';
 
   configurePlatforms = [];
