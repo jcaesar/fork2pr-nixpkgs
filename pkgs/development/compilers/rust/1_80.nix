@@ -29,9 +29,8 @@
   overrideCC,
 }@args:
 let
-  llvmSharedFor =
-    pkgSet:
-    pkgSet.llvmPackages_18.libllvm.override (
+  llvmSharedFor = pkgSet: if !stdenv.targetPlatform.isWasi
+    then pkgSet.llvmPackages_18.libllvm.override (
       {
         enableSharedLibraries = true;
       }
@@ -42,7 +41,8 @@ let
           cc = pkgSet.llvmPackages_18.clangUseLLVM;
         };
       }
-    );
+    )
+  else pkgSet.llvmPackages_18.libllvm;
 in
 import ./default.nix
   {
@@ -58,7 +58,7 @@ import ./default.nix
 
     # Expose llvmPackages used for rustc from rustc via passthru for LTO in Firefox
     llvmPackages =
-      if (stdenv.targetPlatform.useLLVM or false) then
+      if ((stdenv.targetPlatform.useLLVM or false) && !stdenv.targetPlatform.isWasi) then
         callPackage (
           {
             pkgs,
